@@ -1,0 +1,7 @@
+name: NoisyPatterns
+author: SirYwell
+version: "1.0.0"
+main: de.sirywell.noisypatterns.NoisyPatternsPlugin
+depend:
+  - "FastAsyncWorldEdit"
+api-version: "1.13"
