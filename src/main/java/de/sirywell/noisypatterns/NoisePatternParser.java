@@ -1,5 +1,7 @@
 package de.sirywell.noisypatterns;
 
+import com.fastasyncworldedit.core.command.SuggestInputParseException;
+import com.fastasyncworldedit.core.extension.factory.parser.AliasedParser;
 import com.fastasyncworldedit.core.extension.factory.parser.RichParser;
 import com.fastasyncworldedit.core.math.random.NoiseRandom;
 import com.sk89q.worldedit.WorldEdit;
@@ -16,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class NoisePatternParser extends RichParser<Pattern> {
+public class NoisePatternParser extends RichParser<Pattern> implements AliasedParser {
     private static final String PREFIX = "#noise";
 
     protected NoisePatternParser(WorldEdit worldEdit) {
@@ -42,7 +44,7 @@ public class NoisePatternParser extends RichParser<Pattern> {
     @Override
     protected Pattern parseFromInput(@NotNull String[] arguments, ParserContext context) throws InputParseException {
         if (arguments.length != 2 && arguments.length != 3) {
-            return null;
+            throw new InputParseException(TextComponent.of("Incomplete noise. Example usage: #noise[c]"));
         }
         List<Lexer.Token> tokens = new Lexer().lex(arguments[0]);
         ArrayDeque<Lexer.Token> queue = new ArrayDeque<>(tokens);

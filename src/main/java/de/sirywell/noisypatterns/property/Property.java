@@ -7,7 +7,7 @@ import net.royawesome.jlibnoise.module.Module;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-sealed public abstract class Property<T> permits ModuleProperty, PrimitiveProperty {
+sealed public abstract class Property<T> permits ModuleProperty, PrimitiveProperty, Tuple2Property, Tuple3Property {
     private final String name;
 
     Property(String name) {

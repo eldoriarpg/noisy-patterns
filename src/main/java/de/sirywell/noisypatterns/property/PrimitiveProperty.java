@@ -17,6 +17,6 @@ sealed public abstract class PrimitiveProperty<T>
 
     @Override
     protected void setUnchecked(Module module, T value) throws Throwable {
-        setter.invoke(module, value);
+        this.setter.invoke(module, value);
     }
 }

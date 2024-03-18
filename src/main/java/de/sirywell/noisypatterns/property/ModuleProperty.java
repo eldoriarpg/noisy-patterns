@@ -1,19 +1,23 @@
 package de.sirywell.noisypatterns.property;
 
 import de.sirywell.noisypatterns.Lexer;
-import de.sirywell.noisypatterns.NoisePatternParser;
+import de.sirywell.noisypatterns.util.Tuple2;
+import de.sirywell.noisypatterns.util.Tuple3;
 import net.royawesome.jlibnoise.module.Cache;
 import net.royawesome.jlibnoise.module.Module;
 import net.royawesome.jlibnoise.module.combiner.*;
 import net.royawesome.jlibnoise.module.modifier.*;
 import net.royawesome.jlibnoise.module.source.*;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -211,7 +215,7 @@ public final class ModuleProperty extends Property<Module> {
     private record ModuleData(Map<String, Property<?>> properties, Supplier<Module> moduleFactory) {
     }
 
-    private record PropertyMethod(String propertyName, Class<?> parameterType) {
+    private record PropertyMethod(String propertyName, Class<?>[] parameterTypes) {
     }
 
     private static <M extends Module> ModuleData scanModule(Class<M> moduleClass)
@@ -229,11 +233,11 @@ public final class ModuleProperty extends Property<Module> {
                 continue;
             }
             String propertyName = propertyMethod.propertyName();
-            Class<?> type = propertyMethod.parameterType();
+            Class<?>[] types = propertyMethod.parameterTypes();
             MethodHandle setter = lookup.unreflect(method);
-            Property<?> property = forType(propertyName, setter, type);
+            Property<?> property = forParameters(propertyName, setter, types);
             if (property == null) {
-                System.err.println("unsupported: " + type + " in " + moduleClass + "#" + method.getName());
+                System.err.println("unsupported: " + Arrays.toString(types) + " in " + moduleClass + "#" + method.getName());
                 continue;
             }
             properties.put(propertyName, property);
@@ -252,7 +256,53 @@ public final class ModuleProperty extends Property<Module> {
         return new ModuleData(Map.copyOf(properties), new ModuleSupplier());
     }
 
-    private static Property<?> forType(String propertyName, MethodHandle setter, Class<?> type) {
+    private static Property<?> forParameters(String propertyName, MethodHandle setter, Class<?>[] types) {
+        if (types.length == 1) {
+			return forType(propertyName, setter, types[0]);
+		} else if (types.length == 2) {
+            Property<?> first = forType("?", null, types[0]);
+            Property<?> second = forType("?", null, types[1]);
+            if (first != null && second != null) {
+                return new Tuple2Property<>(propertyName, first, second, extractFromRecord(setter, Tuple2.class));
+            }
+        } else if (types.length == 3) {
+            Property<?> first = forType("?", null, types[0]);
+            Property<?> second = forType("?", null, types[1]);
+            Property<?> third = forType("?", null, types[2]);
+            if (first != null && second != null && third != null) {
+                return new Tuple3Property<>(propertyName, first, second, third, extractFromRecord(setter, Tuple3.class));
+            }
+        }
+        return null;
+    }
+
+    private static MethodHandle extractFromRecord(MethodHandle setter, Class<?  extends Record> recordType) {
+		MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodHandle[] filters = Arrays.stream(recordType.getRecordComponents())
+                .map(component -> unreflect(lookup, component))
+                .toArray(MethodHandle[]::new);
+        MethodType type = setter.type();
+        for (int i = 0; i < filters.length; i++) {
+            filters[i] = filters[i].asType(filters[i].type().changeReturnType(setter.type().parameterType(i + 1)));
+        }
+        MethodHandle spread = MethodHandles.filterArguments(setter, 1 /* skip receiver */, filters);
+
+        int[] reorder = new int[filters.length + 1];
+        Arrays.fill(reorder, 1, reorder.length, 1);
+        // (receiver, t0, ..., tn) -> (receiver, recordType)
+        MethodType newType = MethodType.methodType(type.returnType(), type.parameterType(0), recordType);
+        return MethodHandles.permuteArguments(spread, newType, reorder);
+    }
+
+    private static MethodHandle unreflect(MethodHandles.Lookup lookup, RecordComponent recordComponent) {
+		try {
+			return lookup.unreflect(recordComponent.getAccessor());
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+    private static @Nullable Property<?> forType(String propertyName, MethodHandle setter, Class<?> type) {
         if (type == boolean.class) {
             return new BooleanProperty(propertyName, setter);
         } else if (type == int.class) {
@@ -295,7 +345,7 @@ public final class ModuleProperty extends Property<Module> {
         return ((Lexer.IdentifierToken) expect).identifier();
     }
 
-    private static Lexer.Token expect(Lexer.TokenType type, Queue<Lexer.Token> input) {
+    static Lexer.Token expect(Lexer.TokenType type, Queue<Lexer.Token> input) {
         Lexer.Token remove = input.remove();
         if (remove.type() != type) {
             throw new RuntimeException("wrong type, expected " + type);
@@ -317,12 +367,12 @@ public final class ModuleProperty extends Property<Module> {
 
     private static PropertyMethod getPropertyMethod(Method method) {
         if (method.getReturnType() != void.class) return null;
-        if (method.getParameterCount() != 1) return null;
+        if (method.getParameterCount() == 0) return null;
         // skip methods coming from irrelevant super types
         if (method.getDeclaringClass().getModule() == Object.class.getModule()) return null;
-        Class<?> parameterType = method.getParameterTypes()[0];
-        if (parameterType.isPrimitive()) {
-            return new PropertyMethod(getPropertyName(method), parameterType);
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        if (Arrays.stream(parameterTypes).allMatch(Class::isPrimitive)) {
+            return new PropertyMethod(getPropertyName(method), parameterTypes);
         }
         return null;
     }
