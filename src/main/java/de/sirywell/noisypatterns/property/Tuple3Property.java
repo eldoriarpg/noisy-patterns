@@ -37,6 +37,46 @@ public final class Tuple3Property<A, B, C> extends Property<Tuple3<A, B, C>> {
 
 	@Override
 	protected Stream<String> suggestValue(Queue<Lexer.Token> input, ModuleProperty.ModuleParseContext context) {
+		if (input.isEmpty() || input.element().type() != Lexer.TokenType.BRACKET_OPEN) {
+			return Stream.empty();
+		}
+		input.remove(); // BRACKET_OPEN
+		if (input.isEmpty()) {
+			return this.firstProperty.suggestValue(input, context).map(s -> "[" + s);
+		}
+		if (input.size() == 1) {
+			return this.firstProperty.suggestValue(input, context).map(s -> "[" + s + ",");
+		}
+		Lexer.Token firstId = input.remove();
+		if (firstId.type() != Lexer.TokenType.IDENTIFIER) {
+			return Stream.empty();
+		}
+		if (input.remove().type() != Lexer.TokenType.COMMA) {
+			return Stream.empty();
+		}
+		if (input.isEmpty()) {
+			return this.secondProperty.suggestValue(input, context).map(s -> "[" + firstId + "," + s);
+		}
+		if (input.size() == 1) {
+			return this.secondProperty.suggestValue(input, context).map(s -> "[" + firstId + "," + s + ",");
+		}
+		Lexer.Token secondId = input.remove();
+		if (secondId.type() != Lexer.TokenType.IDENTIFIER) {
+			return Stream.empty();
+		}
+		if (input.remove().type() != Lexer.TokenType.COMMA) {
+			return Stream.empty();
+		}
+		if (input.isEmpty()) {
+			return this.thirdProperty.suggestValue(input, context).map(s -> "[" + firstId + "," + secondId + "," + s);
+		}
+		if (input.size() == 1) {
+			return this.thirdProperty.suggestValue(input, context).map(s -> "[" + firstId + "," + secondId + "," + s + "]");
+		}
+		if (input.remove().type() != Lexer.TokenType.IDENTIFIER) {
+			return Stream.empty();
+		}
+		input.remove(); // assume BRACKET_CLOSE
 		return Stream.empty();
 	}
 

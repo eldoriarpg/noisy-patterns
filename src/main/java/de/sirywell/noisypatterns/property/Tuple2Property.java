@@ -32,6 +32,33 @@ public final class Tuple2Property<A, B> extends Property<Tuple2<A, B>> {
 
 	@Override
 	protected Stream<String> suggestValue(Queue<Lexer.Token> input, ModuleProperty.ModuleParseContext context) {
+		if (input.isEmpty() || input.element().type() != Lexer.TokenType.BRACKET_OPEN) {
+			return Stream.empty();
+		}
+		input.remove(); // BRACKET_OPEN
+		if (input.isEmpty()) {
+			return this.firstProperty.suggestValue(input, context).map(s -> "[" + s);
+		}
+		if (input.size() == 1) {
+			return this.firstProperty.suggestValue(input, context).map(s -> "[" + s + ",");
+		}
+		Lexer.Token firstId = input.remove();
+		if (firstId.type() != Lexer.TokenType.IDENTIFIER) {
+			return Stream.empty();
+		}
+		if (input.remove().type() != Lexer.TokenType.COMMA) {
+			return Stream.empty();
+		}
+		if (input.isEmpty()) {
+			return this.secondProperty.suggestValue(input, context).map(s -> "[" + firstId + "," + s);
+		}
+		if (input.size() == 1) {
+			return this.secondProperty.suggestValue(input, context).map(s -> "[" + firstId + "," + s + "]");
+		}
+		if (input.remove().type() != Lexer.TokenType.IDENTIFIER) {
+			return Stream.empty();
+		}
+		input.remove(); // assume BRACKET_CLOSE
 		return Stream.empty();
 	}
 

@@ -44,7 +44,7 @@ public class NoisePatternParser extends RichParser<Pattern> implements AliasedPa
     @Override
     protected Pattern parseFromInput(@NotNull String[] arguments, ParserContext context) throws InputParseException {
         if (arguments.length != 2 && arguments.length != 3) {
-            throw new InputParseException(TextComponent.of("Incomplete noise. Example usage: #noise[c]"));
+            throw new InputParseException(TextComponent.of("Incomplete noise. Example usage: #noise[const[value=0.5]][stone,dirt]"));
         }
         List<Lexer.Token> tokens = new Lexer().lex(arguments[0]);
         ArrayDeque<Lexer.Token> queue = new ArrayDeque<>(tokens);
