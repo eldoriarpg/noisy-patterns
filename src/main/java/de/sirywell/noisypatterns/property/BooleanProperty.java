@@ -1,3 +1,8 @@
+/*
+ *     SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ *     Copyright (C) EldoriaRPG Team and Contributor
+ */
 package de.sirywell.noisypatterns.property;
 
 import com.sk89q.worldedit.command.util.SuggestionHelper;
