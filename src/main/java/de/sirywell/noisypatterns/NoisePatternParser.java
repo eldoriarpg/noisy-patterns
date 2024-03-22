@@ -1,6 +1,10 @@
+/*
+ *     SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ *     Copyright (C) EldoriaRPG Team and Contributor
+ */
 package de.sirywell.noisypatterns;
 
-import com.fastasyncworldedit.core.command.SuggestInputParseException;
 import com.fastasyncworldedit.core.extension.factory.parser.AliasedParser;
 import com.fastasyncworldedit.core.extension.factory.parser.RichParser;
 import com.fastasyncworldedit.core.math.random.NoiseRandom;
@@ -11,11 +15,12 @@ import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
-import de.sirywell.noisypatterns.property.*;
+import de.sirywell.noisypatterns.property.ModuleProperty;
 import net.royawesome.jlibnoise.module.Module;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class NoisePatternParser extends RichParser<Pattern> implements AliasedParser {
@@ -30,6 +35,18 @@ public class NoisePatternParser extends RichParser<Pattern> implements AliasedPa
         if (index == 1) {
             return worldEdit.getPatternFactory().getSuggestions(argumentInput).stream();
         }
+        return stringStream(argumentInput, index);
+    }
+
+    @Override
+    protected Stream<String> getSuggestions(String argumentInput, int index, ParserContext context) {
+        if (index == 1) {
+            return worldEdit.getPatternFactory().getSuggestions(argumentInput, context).stream();
+        }
+        return stringStream(argumentInput, index);
+    }
+
+    private Stream<String> stringStream(String argumentInput, int index) {
         if (index == 0) {
             List<Lexer.Token> tokens = new Lexer().lex(argumentInput);
             ArrayDeque<Lexer.Token> queue = new ArrayDeque<>(tokens);
@@ -42,7 +59,7 @@ public class NoisePatternParser extends RichParser<Pattern> implements AliasedPa
     }
 
     @Override
-    protected Pattern parseFromInput(@NotNull String[] arguments, ParserContext context) throws InputParseException {
+    protected Pattern parseFromInput(@NotNull String @NotNull [] arguments, ParserContext context) throws InputParseException {
         if (arguments.length != 2 && arguments.length != 3) {
             throw new InputParseException(TextComponent.of("Incomplete noise. Example usage: #noise[const[value=0.5]][stone,dirt]"));
         }
