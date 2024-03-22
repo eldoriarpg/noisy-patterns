@@ -91,6 +91,9 @@ tasks {
     test {
         useJUnitPlatform()
     }
+    getByName("modrinth") {
+        dependsOn(modrinthSyncBody)
+    }
 }
 
 hangarPublish {
