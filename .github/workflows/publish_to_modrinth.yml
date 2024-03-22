@@ -27,10 +27,10 @@ jobs:
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           MODRINTH_CHANNEL: release
-        run: ./gradlew modrinth
+        run: ./gradlew modrinth && ./gradlew modrinthSyncBody
       - name: Publish dev to Modrinth
         if: github.ref_name == 'dev'
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           MODRINTH_CHANNEL: development
-        run: ./gradlew modrinth
+        run: ./gradlew modrinth && ./gradlew modrinthSyncBody
