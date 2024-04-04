@@ -18,7 +18,7 @@ plugins {
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            version("fawe", "2.9.1")
+            version("fawe", "2.9.2")
             library("fawe-core", "com.fastasyncworldedit", "FastAsyncWorldEdit-Core").versionRef("fawe")
             library("fawe-bukkit", "com.fastasyncworldedit", "FastAsyncWorldEdit-Bukkit").versionRef("fawe")
             bundle("fawe", listOf("fawe-core", "fawe-bukkit"))
