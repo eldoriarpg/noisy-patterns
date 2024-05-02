@@ -31,7 +31,7 @@ dependencyResolutionManagement {
             plugin("pluginyml", "net.minecrell.plugin-yml.bukkit").version("0.6.0")
             plugin("hangar", "io.papermc.hangar-publish-plugin").version("0.1.2")
             plugin("modrinth", "com.modrinth.minotaur").version("2.8.7")
-            plugin("runserver", "xyz.jpenilla.run-paper").version("2.2.3")
+            plugin("runserver", "xyz.jpenilla.run-paper").version("2.3.0")
         }
     }
 }
