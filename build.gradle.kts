@@ -3,7 +3,7 @@ import io.papermc.hangarpublishplugin.model.Platforms
 
 plugins {
     java
-    id("xyz.jpenilla.run-paper") version "2.2.3"
+    id("xyz.jpenilla.run-paper") version "2.3.0"
     alias(libs.plugins.spotless)
     alias(libs.plugins.hangar)
     alias(libs.plugins.modrinth)
