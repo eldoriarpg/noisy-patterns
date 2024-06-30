@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("com.intellectualsites.bom:bom-newest:1.42")) // Ref: https://github.com/IntellectualSites/bom
+    implementation(platform("com.intellectualsites.bom:bom-newest:1.46")) // Ref: https://github.com/IntellectualSites/bom
     compileOnly(libs.bundles.fawe)
     compileOnly(libs.paper)
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
