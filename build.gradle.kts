@@ -3,7 +3,7 @@ import io.papermc.hangarpublishplugin.model.Platforms
 
 plugins {
     java
-    id("xyz.jpenilla.run-paper") version "2.2.3"
+    id("xyz.jpenilla.run-paper") version "3.1.0"
     alias(libs.plugins.spotless)
     alias(libs.plugins.hangar)
     alias(libs.plugins.modrinth)
@@ -24,7 +24,7 @@ dependencies {
     implementation(platform("com.intellectualsites.bom:bom-newest:1.42")) // Ref: https://github.com/IntellectualSites/bom
     compileOnly(libs.bundles.fawe)
     compileOnly(libs.paper)
-    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
